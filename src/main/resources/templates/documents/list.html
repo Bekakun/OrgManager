@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head th:replace="~{fragments/commons :: head('Документы')}"></head>
+<body class="app-body">
+
+<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+
+<main class="main-content">
+
+    <th:block th:replace="~{fragments/commons :: alerts}"></th:block>
+
+    <!-- Header -->
+    <div class="content-header">
+        <div>
+            <h1 class="content-title">Документы</h1>
+            <p class="page-subtitle" th:text="${documents.size()} + ' документов'">0 документов</p>
+        </div>
+        <div class="content-actions">
+            <a th:href="@{/documents/new}" class="btn btn-primary">
+                <i class="bi bi-file-earmark-plus-fill me-1"></i>Создать документ
+            </a>
+        </div>
+    </div>
+
+    <!-- Status filter pills -->
+    <div class="d-flex gap-2 flex-wrap">
+        <a th:href="@{/documents}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-grid me-1"></i>Все
+        </a>
+        <a th:href="@{/documents(status='DRAFT')}"    class="btn btn-sm" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0">
+            <span class="status-badge status-draft">ЧЕРНОВИК</span>
+        </a>
+        <a th:href="@{/documents(status='PENDING')}"  class="btn btn-sm" style="background:#fef3c7;color:#b45309;border:1px solid #fde68a">
+            <span class="status-badge status-pending">НА СОГЛАСОВАНИИ</span>
+        </a>
+        <a th:href="@{/documents(status='APPROVED')}" class="btn btn-sm" style="background:#d1fae5;color:#065f46;border:1px solid #a7f3d0">
+            <span class="status-badge status-approved">СОГЛАСОВАН</span>
+        </a>
+        <a th:href="@{/documents(status='REJECTED')}" class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:1px solid #fecaca">
+            <span class="status-badge status-rejected">ОТКЛОНЁН</span>
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div th:if="${documents.isEmpty()}" class="empty-state">
+                <i class="bi bi-file-earmark"></i>
+                <h5>Документов нет</h5>
+                <p>Создайте первый документ для начала работы</p>
+                <a th:href="@{/documents/new}" class="btn btn-primary btn-sm mt-2">
+                    <i class="bi bi-plus-lg me-1"></i>Создать документ
+                </a>
+            </div>
+
+            <table th:unless="${documents.isEmpty()}" class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Автор</th>
+                        <th>Статус</th>
+                        <th>Версия</th>
+                        <th>Создан</th>
+                        <th>Обновлён</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="doc : ${documents}">
+                        <td class="text-muted" th:text="${doc.id}">1</td>
+                        <td>
+                            <a th:href="@{/documents/{id}(id=${doc.id})}"
+                               class="text-decoration-none fw-500 text-truncate-cell d-block"
+                               th:text="${doc.title}">Название документа</a>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-secondary border"
+                                  th:text="${doc.documentType}">Тип</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-sm"
+                                     th:text="${doc.authorName.substring(0,1).toUpperCase()}">A</div>
+                                <span class="small" th:text="${doc.authorName}">Автор</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:class="'status-badge status-' + ${doc.status.toLowerCase()}"
+                                  th:text="${doc.status == 'DRAFT' ? 'Черновик' :
+                                             doc.status == 'PENDING' ? 'На согласовании' :
+                                             doc.status == 'APPROVED' ? 'Согласован' : 'Отклонён'}">Статус</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-secondary border"
+                                  th:text="'v' + ${doc.version}">v1</span>
+                        </td>
+                        <td class="text-muted small"
+                            th:text="${#temporals.format(doc.createdAt,'dd.MM.yyyy')}">01.01.2024</td>
+                        <td class="text-muted small"
+                            th:text="${#temporals.format(doc.updatedAt,'dd.MM.yyyy HH:mm')}">01.01.2024</td>
+                        <td>
+                            <a th:href="@{/documents/{id}(id=${doc.id})}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye me-1"></i>Открыть
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+<th:block th:replace="~{fragments/commons :: scripts}"></th:block>
+</body>
+</html>

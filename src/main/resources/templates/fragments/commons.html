@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- ═══════════════════════════════════════════════════
+     HEAD fragment — call as: th:replace="~{fragments/commons :: head('Title')}"
+     ═══════════════════════════════════════════════════ -->
+<th:block th:fragment="head(pageTitle)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle} + ' — OrgManager'">OrgManager</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</th:block>
+
+<!-- ═══════════════════════════════════════════════════
+     SIDEBAR fragment
+     ═══════════════════════════════════════════════════ -->
+<aside th:fragment="sidebar" class="sidebar">
+
+    <!-- Logo / brand -->
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="bi bi-building-check"></i></div>
+        <div>
+            <span class="brand-title">OrgManager</span>
+            <span class="brand-subtitle">Система управления</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <span class="nav-section-label">Главное меню</span>
+
+            <a th:href="@{/dashboard}"
+               th:classappend="${#request.requestURI.startsWith('/dashboard')} ? ' active' : ''"
+               class="nav-item">
+                <i class="bi bi-grid-1x2-fill"></i><span>Дашборд</span>
+            </a>
+
+            <a sec:authorize="hasAnyRole('ADMIN','MANAGER')"
+               th:href="@{/users}"
+               th:classappend="${#request.requestURI.startsWith('/users')} ? ' active' : ''"
+               class="nav-item">
+                <i class="bi bi-people-fill"></i><span>Сотрудники</span>
+            </a>
+
+            <a th:href="@{/documents}"
+               th:classappend="${#request.requestURI.startsWith('/documents')} ? ' active' : ''"
+               class="nav-item">
+                <i class="bi bi-file-earmark-text-fill"></i><span>Документы</span>
+            </a>
+
+            <a sec:authorize="hasRole('ADMIN')"
+               th:href="@{/audit}"
+               th:classappend="${#request.requestURI.startsWith('/audit')} ? ' active' : ''"
+               class="nav-item">
+                <i class="bi bi-journal-check"></i><span>Журнал аудита</span>
+            </a>
+        </div>
+
+        <div class="nav-section" sec:authorize="hasRole('ADMIN')">
+            <span class="nav-section-label">API</span>
+            <a href="/swagger-ui.html" target="_blank" class="nav-item">
+                <i class="bi bi-code-square"></i><span>Swagger UI</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Current user + logout -->
+    <div class="sidebar-footer">
+        <div class="user-avatar"
+             th:text="${currentUser?.fullName != null ? currentUser.fullName.substring(0,1).toUpperCase() : 'U'}">U</div>
+        <div class="user-details">
+            <span class="user-name" th:text="${currentUser?.fullName ?: 'Пользователь'}">User</span>
+            <span class="user-role" th:text="${currentUser?.role ?: ''}">ROLE</span>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn" title="Выйти">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════════
+     ALERTS fragment — flash messages
+     ═══════════════════════════════════════════════════ -->
+<th:block th:fragment="alerts">
+    <div th:if="${successMessage}"
+         class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2"
+         role="alert">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}"
+         class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2"
+         role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+</th:block>
+
+<!-- ═══════════════════════════════════════════════════
+     SCRIPTS fragment
+     ═══════════════════════════════════════════════════ -->
+<th:block th:fragment="scripts">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</th:block>
+
+</html>

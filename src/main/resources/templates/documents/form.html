@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head th:replace="~{fragments/commons :: head('Новый документ')}"></head>
+<body class="app-body">
+
+<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+
+<main class="main-content">
+
+    <th:block th:replace="~{fragments/commons :: alerts}"></th:block>
+
+    <!-- Header -->
+    <div class="content-header">
+        <div>
+            <h1 class="content-title">Новый документ</h1>
+            <p class="page-subtitle">
+                <a th:href="@{/documents}" class="text-muted text-decoration-none">
+                    <i class="bi bi-arrow-left me-1"></i>Назад к списку
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-file-earmark-plus me-2 text-primary"></i>
+                    Заполните данные документа
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/documents}" method="post"
+                          enctype="multipart/form-data">
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Название документа <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="title" class="form-control"
+                                   placeholder="Например: Приказ о премировании №15"
+                                   required/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Тип документа <span class="text-danger">*</span>
+                            </label>
+                            <select name="documentType" class="form-select" required>
+                                <option value="">— Выберите тип —</option>
+                                <option value="Приказ">Приказ</option>
+                                <option value="Договор">Договор</option>
+                                <option value="Служебная записка">Служебная записка</option>
+                                <option value="Отчёт">Отчёт</option>
+                                <option value="Заявление">Заявление</option>
+                                <option value="Акт">Акт</option>
+                                <option value="Протокол">Протокол</option>
+                                <option value="Инструкция">Инструкция</option>
+                                <option value="Другое">Другое</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Прикрепить файл</label>
+                            <input type="file" name="file" class="form-control"
+                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.png"/>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Допустимы: PDF, Word, Excel, TXT, изображения. Макс. 10 МБ.
+                            </div>
+                        </div>
+
+                        <!-- Info box -->
+                        <div class="alert alert-info d-flex gap-2 align-items-start">
+                            <i class="bi bi-lightbulb-fill mt-1 flex-shrink-0"></i>
+                            <div class="small">
+                                Документ будет создан в статусе <strong>Черновик</strong>.
+                                После создания вы сможете отправить его на согласование,
+                                указав согласующих лиц.
+                            </div>
+                        </div>
+
+                        <hr class="my-3"/>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a th:href="@{/documents}" class="btn btn-outline-secondary">
+                                Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-file-earmark-plus me-1"></i>Создать документ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+<th:block th:replace="~{fragments/commons :: scripts}"></th:block>
+</body>
+</html>

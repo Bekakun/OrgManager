@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head th:replace="~{fragments/commons :: head('Дашборд')}"></head>
+<body class="app-body">
+
+<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+
+<main class="main-content">
+
+    <!-- Alerts -->
+    <th:block th:replace="~{fragments/commons :: alerts}"></th:block>
+
+    <!-- Page header -->
+    <div class="content-header">
+        <div>
+            <h1 class="content-title">Дашборд</h1>
+            <p class="page-subtitle">Обзор системы в реальном времени</p>
+        </div>
+        <div class="d-flex align-items-center gap-2 text-muted">
+            <i class="bi bi-calendar3"></i>
+            <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMMM yyyy', new java.util.Locale('ru'))}">Дата</span>
+        </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="row g-3">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-top">
+                    <div>
+                        <div class="stat-value" th:text="${stats.totalUsers}">0</div>
+                        <div class="stat-label">Всего сотрудников</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+                </div>
+                <div class="stat-footer">
+                    <i class="bi bi-person-check me-1"></i>
+                    <span th:text="${stats.activeUsers}">0</span> активных
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-info">
+                <div class="stat-top">
+                    <div>
+                        <div class="stat-value" th:text="${stats.totalDocuments}">0</div>
+                        <div class="stat-label">Всего документов</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+                </div>
+                <div class="stat-footer">
+                    <i class="bi bi-archive me-1"></i>
+                    Все записи в системе
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-warning">
+                <div class="stat-top">
+                    <div>
+                        <div class="stat-value" th:text="${stats.pendingDocuments}">0</div>
+                        <div class="stat-label">На согласовании</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+                </div>
+                <div class="stat-footer">
+                    <i class="bi bi-clock me-1"></i>
+                    Ожидают решения
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-success">
+                <div class="stat-top">
+                    <div>
+                        <div class="stat-value" th:text="${stats.approvedDocuments}">0</div>
+                        <div class="stat-label">Согласовано</div>
+                    </div>
+                    <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+                </div>
+                <div class="stat-footer">
+                    <i class="bi bi-x-circle me-1 text-danger"></i>
+                    Отклонено: <span th:text="${stats.rejectedDocuments}">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent documents table -->
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-clock-history me-2 text-primary"></i>Последние документы</span>
+            <a th:href="@{/documents}" class="btn btn-sm btn-outline-primary">
+                Все документы <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div th:if="${recentDocuments.isEmpty()}" class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <h5>Документов пока нет</h5>
+                <p>Создайте первый документ, чтобы начать работу</p>
+                <a th:href="@{/documents/new}" class="btn btn-primary btn-sm mt-2">
+                    <i class="bi bi-plus-lg me-1"></i>Создать документ
+                </a>
+            </div>
+            <table th:unless="${recentDocuments.isEmpty()}" class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Автор</th>
+                        <th>Статус</th>
+                        <th>Версия</th>
+                        <th>Дата</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="doc : ${recentDocuments}">
+                        <td class="text-muted" th:text="${doc.id}">1</td>
+                        <td class="fw-500 text-truncate-cell" th:text="${doc.title}">Название</td>
+                        <td>
+                            <span class="badge bg-light text-secondary border"
+                                  th:text="${doc.documentType}">Тип</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-sm"
+                                     th:text="${doc.authorName.substring(0,1).toUpperCase()}">A</div>
+                                <span th:text="${doc.authorName}">Автор</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:class="'status-badge status-' + ${doc.status.toLowerCase()}"
+                                  th:text="${doc.status}">DRAFT</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-secondary border"
+                                  th:text="'v' + ${doc.version}">v1</span>
+                        </td>
+                        <td class="text-muted"
+                            th:text="${#temporals.format(doc.createdAt,'dd.MM.yyyy')}">01.01.2024</td>
+                        <td>
+                            <a th:href="@{/documents/{id}(id=${doc.id})}"
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<th:block th:replace="~{fragments/commons :: scripts}"></th:block>
+</body>
+</html>

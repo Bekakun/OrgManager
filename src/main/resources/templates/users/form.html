@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head th:replace="~{fragments/commons :: head(${editMode} ? 'Редактировать сотрудника' : 'Новый сотрудник')}"></head>
+<body class="app-body">
+
+<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+
+<main class="main-content">
+
+    <th:block th:replace="~{fragments/commons :: alerts}"></th:block>
+
+    <!-- Header -->
+    <div class="content-header">
+        <div>
+            <h1 class="content-title"
+                th:text="${editMode} ? 'Редактировать сотрудника' : 'Новый сотрудник'">Сотрудник</h1>
+            <p class="page-subtitle">
+                <a th:href="@{/users}" class="text-muted text-decoration-none">
+                    <i class="bi bi-arrow-left me-1"></i>Назад к списку
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-person-vcard me-2 text-primary"></i>
+                    <span th:text="${editMode} ? 'Данные сотрудника' : 'Заполните данные нового сотрудника'">Форма</span>
+                </div>
+                <div class="card-body">
+
+                    <!-- CREATE form -->
+                    <form th:unless="${editMode}"
+                          th:action="@{/users}" method="post">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">ФИО <span class="text-danger">*</span></label>
+                                <input type="text" name="fullName" class="form-control"
+                                       placeholder="Иванов Иван Иванович" required/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control"
+                                       placeholder="ivanov@company.kz" required/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Пароль <span class="text-danger">*</span></label>
+                                <input type="password" name="password" class="form-control"
+                                       placeholder="Минимум 6 символов" required minlength="6"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Должность</label>
+                                <input type="text" name="position" class="form-control"
+                                       placeholder="Инженер-программист"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Отдел</label>
+                                <select name="departmentId" class="form-select">
+                                    <option value="">— Без отдела —</option>
+                                    <option th:each="dept : ${departments}"
+                                            th:value="${dept.id}"
+                                            th:text="${dept.name}">Отдел</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Роль <span class="text-danger">*</span></label>
+                                <select name="role" class="form-select" required>
+                                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">ROLE</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr class="my-4"/>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a th:href="@{/users}" class="btn btn-outline-secondary">Отмена</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus me-1"></i>Создать сотрудника
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- EDIT form -->
+                    <form th:if="${editMode}"
+                          th:action="@{/users/{id}/edit(id=${user.id})}" method="post">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">ФИО</label>
+                                <input type="text" name="fullName" class="form-control"
+                                       th:value="${user.fullName}"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control"
+                                       th:value="${user.email}" disabled/>
+                                <div class="form-text">Email нельзя изменить</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Должность</label>
+                                <input type="text" name="position" class="form-control"
+                                       th:value="${user.position}"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Отдел</label>
+                                <select name="departmentId" class="form-select">
+                                    <option value="">— Без отдела —</option>
+                                    <option th:each="dept : ${departments}"
+                                            th:value="${dept.id}"
+                                            th:text="${dept.name}"
+                                            th:selected="${dept.id == user.departmentId}">Отдел</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Роль</label>
+                                <select name="role" class="form-select">
+                                    <option th:each="r : ${roles}"
+                                            th:value="${r}"
+                                            th:text="${r}"
+                                            th:selected="${r.name() == user.role}">ROLE</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Статус</label>
+                                <select name="status" class="form-select">
+                                    <option th:each="s : ${statuses}"
+                                            th:value="${s}"
+                                            th:text="${s == T(kz.masku.orgmanager.model.enums.UserStatus).ACTIVE ? 'Активен' : 'Неактивен'}"
+                                            th:selected="${s.name() == user.status}">Статус</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr class="my-4"/>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a th:href="@{/users}" class="btn btn-outline-secondary">Отмена</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-floppy me-1"></i>Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+<th:block th:replace="~{fragments/commons :: scripts}"></th:block>
+</body>
+</html>

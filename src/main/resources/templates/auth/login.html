@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Вход — OrgManager</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body class="login-body">
+
+<div class="login-card">
+
+    <!-- Left decorative panel -->
+    <div class="login-left">
+        <div class="login-logo"><i class="bi bi-building-check"></i></div>
+        <h1>OrgManager</h1>
+        <p class="opacity-75 mb-4">Единая платформа для управления организацией</p>
+        <ul class="login-features">
+            <li><i class="bi bi-check2-circle"></i>Управление персоналом и HR-процессы</li>
+            <li><i class="bi bi-check2-circle"></i>Электронный документооборот</li>
+            <li><i class="bi bi-check2-circle"></i>Контроль доступа (RBAC)</li>
+            <li><i class="bi bi-check2-circle"></i>Журнал аудита всех действий</li>
+        </ul>
+    </div>
+
+    <!-- Right login form -->
+    <div class="login-right">
+        <h2>Добро пожаловать</h2>
+        <p class="text-muted mb-4">Войдите в систему для продолжения работы</p>
+
+        <!-- Error / success alerts -->
+        <div th:if="${param.error}"
+             class="alert alert-danger d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Неверный email или пароль
+        </div>
+        <div th:if="${param.logout}"
+             class="alert alert-info d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-info-circle-fill"></i>
+            Вы успешно вышли из системы
+        </div>
+
+        <form th:action="@{/login}" method="post">
+
+            <div class="mb-3">
+                <label class="form-label">Email адрес</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                    <input type="email" name="email" class="form-control"
+                           placeholder="admin@orgmanager.kz" required autofocus/>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Пароль</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input type="password" name="password" id="passwordInput"
+                           class="form-control" placeholder="••••••••" required/>
+                    <button type="button" class="btn btn-outline-secondary"
+                            onclick="togglePwd()" tabindex="-1">
+                        <i class="bi bi-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-login w-100">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Войти в систему
+            </button>
+        </form>
+
+        <div class="login-hint mt-3">
+            <small>Тестовый аккаунт: <strong>admin@orgmanager.kz</strong> / <strong>Admin123!</strong></small>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePwd() {
+        const inp = document.getElementById('passwordInput');
+        const ico = document.getElementById('eyeIcon');
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            ico.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            inp.type = 'password';
+            ico.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    }
+</script>
+</body>
+</html>

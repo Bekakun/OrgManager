@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head th:replace="~{fragments/commons :: head('Сотрудники')}"></head>
+<body class="app-body">
+
+<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+
+<main class="main-content">
+
+    <th:block th:replace="~{fragments/commons :: alerts}"></th:block>
+
+    <!-- Header -->
+    <div class="content-header">
+        <div>
+            <h1 class="content-title">Сотрудники</h1>
+            <p class="page-subtitle" th:text="${users.size()} + ' записей'">0 записей</p>
+        </div>
+        <div class="content-actions">
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/users/new}"
+               class="btn btn-primary">
+                <i class="bi bi-person-plus-fill me-1"></i>Добавить сотрудника
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+        <div class="card-body py-2">
+            <form th:action="@{/users}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label mb-1 small">Отдел</label>
+                    <select name="departmentId" class="form-select form-select-sm">
+                        <option value="">Все отделы</option>
+                        <option th:each="dept : ${departments}"
+                                th:value="${dept.id}"
+                                th:text="${dept.name}"
+                                th:selected="${dept.id == selectedDept}">Отдел</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label mb-1 small">Роль</label>
+                    <select name="role" class="form-select form-select-sm">
+                        <option value="">Все роли</option>
+                        <option th:each="r : ${roles}"
+                                th:value="${r}"
+                                th:text="${r}"
+                                th:selected="${r == selectedRole}">ROLE</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-funnel me-1"></i>Фильтр
+                    </button>
+                    <a th:href="@{/users}" class="btn btn-outline-secondary btn-sm ms-1">
+                        <i class="bi bi-x"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div th:if="${users.isEmpty()}" class="empty-state">
+                <i class="bi bi-people"></i>
+                <h5>Сотрудники не найдены</h5>
+                <p>Попробуйте изменить параметры фильтрации</p>
+            </div>
+            <table th:unless="${users.isEmpty()}" class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Сотрудник</th>
+                        <th>Должность</th>
+                        <th>Отдел</th>
+                        <th>Роль</th>
+                        <th>Статус</th>
+                        <th sec:authorize="hasRole('ADMIN')">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <td class="text-muted" th:text="${user.id}">1</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-sm"
+                                     th:text="${user.fullName.substring(0,1).toUpperCase()}">A</div>
+                                <div>
+                                    <div class="fw-500" th:text="${user.fullName}">ФИО</div>
+                                    <div class="text-muted small" th:text="${user.email}">email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${user.position ?: '—'}">Должность</td>
+                        <td>
+                            <span th:if="${user.departmentName != null}"
+                                  class="badge bg-light text-secondary border"
+                                  th:text="${user.departmentName}">Отдел</span>
+                            <span th:unless="${user.departmentName != null}" class="text-muted">—</span>
+                        </td>
+                        <td>
+                            <span th:class="'badge ' + (${user.role == 'ADMIN'} ? 'bg-danger' : (${user.role == 'MANAGER'} ? 'bg-warning text-dark' : 'bg-secondary'))"
+                                  th:text="${user.role}">ROLE</span>
+                        </td>
+                        <td>
+                            <span th:class="'badge ' + (${user.status == 'ACTIVE'} ? 'bg-success' : 'bg-secondary')"
+                                  th:text="${user.status == 'ACTIVE'} ? 'Активен' : 'Неактивен'">Статус</span>
+                        </td>
+                        <td sec:authorize="hasRole('ADMIN')">
+                            <div class="d-flex gap-1">
+                                <a th:href="@{/users/{id}/edit(id=${user.id})}"
+                                   class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:if="${user.status == 'ACTIVE'}"
+                                      th:action="@{/users/{id}/deactivate(id=${user.id})}" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            title="Деактивировать"
+                                            onclick="return confirm('Деактивировать сотрудника?')">
+                                        <i class="bi bi-person-x"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+<th:block th:replace="~{fragments/commons :: scripts}"></th:block>
+</body>
+</html>

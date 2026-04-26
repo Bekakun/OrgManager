@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head th:replace="~{fragments/commons :: head('Журнал аудита')}"></head>
+<body class="app-body">
+
+<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+
+<main class="main-content">
+
+    <th:block th:replace="~{fragments/commons :: alerts}"></th:block>
+
+    <!-- Header -->
+    <div class="content-header">
+        <div>
+            <h1 class="content-title">Журнал аудита</h1>
+            <p class="page-subtitle">Полная история всех действий в системе</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-danger">ADMIN</span>
+            <span class="text-muted small">Только для администраторов</span>
+        </div>
+    </div>
+
+    <!-- Info banner -->
+    <div class="alert alert-info d-flex gap-2 align-items-center mb-0">
+        <i class="bi bi-shield-lock-fill flex-shrink-0"></i>
+        <span class="small">
+            Все записи <strong>неизменны</strong> после создания.
+            Показано последних <strong th:text="${logsPage.numberOfElements}">50</strong> записей
+            из <strong th:text="${logsPage.totalElements}">0</strong> всего.
+        </span>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div th:if="${logsPage.isEmpty()}" class="empty-state">
+                <i class="bi bi-journal"></i>
+                <h5>Записей в журнале нет</h5>
+                <p>Действия в системе появятся здесь автоматически</p>
+            </div>
+
+            <table th:unless="${logsPage.isEmpty()}" class="table table-hover" style="font-size:.875rem">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Время</th>
+                        <th>Пользователь</th>
+                        <th>Действие</th>
+                        <th>Объект</th>
+                        <th>ID объекта</th>
+                        <th>Детали</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logsPage.content}">
+                        <td class="text-muted small" th:text="${log.id}">1</td>
+                        <td class="text-muted small text-nowrap"
+                            th:text="${#temporals.format(log.createdAt,'dd.MM.yyyy HH:mm:ss')}">дата</td>
+                        <td>
+                            <span th:if="${log.user != null}"
+                                  class="d-flex align-items-center gap-2">
+                                <div class="avatar-sm"
+                                     th:text="${log.user.fullName.substring(0,1).toUpperCase()}">A</div>
+                                <div>
+                                    <div class="fw-500 small" th:text="${log.user.fullName}">ФИО</div>
+                                    <div class="text-muted" style="font-size:.75rem" th:text="${log.user.email}">email</div>
+                                </div>
+                            </span>
+                            <span th:unless="${log.user != null}"
+                                  class="badge bg-secondary">СИСТЕМА</span>
+                        </td>
+                        <td>
+                            <span th:class="'badge ' +
+                                (${log.action.contains('CREATED')}  ? 'bg-success' :
+                                 ${log.action.contains('DELETED') or log.action.contains('DEACTIVATED')} ? 'bg-danger' :
+                                 ${log.action.contains('APPROVED')} ? 'bg-success' :
+                                 ${log.action.contains('REJECTED')} ? 'bg-danger' :
+                                 ${log.action.contains('SUBMITTED')} ? 'bg-warning text-dark' : 'bg-secondary')"
+                                  th:text="${log.action}">ACTION</span>
+                        </td>
+                        <td class="text-muted" th:text="${log.entityType ?: '—'}">Entity</td>
+                        <td class="text-muted" th:text="${log.entityId ?: '—'}">1</td>
+                        <td>
+                            <span th:if="${log.details != null}"
+                                  class="text-muted small" style="word-break:break-all"
+                                  th:text="${#strings.abbreviate(log.details, 60)}">details</span>
+                            <span th:unless="${log.details != null}" class="text-muted">—</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${logsPage.totalPages > 1}" class="d-flex justify-content-center gap-2">
+        <a th:href="@{/audit(page=${currentPage - 1})}"
+           th:classappend="${currentPage == 0} ? ' disabled' : ''"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-left"></i>
+        </a>
+        <span th:each="p : ${#numbers.sequence(0, logsPage.totalPages - 1)}">
+            <a th:href="@{/audit(page=${p})}"
+               th:classappend="${p == currentPage} ? ' active' : ''"
+               th:text="${p + 1}"
+               class="btn btn-outline-secondary btn-sm">1</a>
+        </span>
+        <a th:href="@{/audit(page=${currentPage + 1})}"
+           th:classappend="${currentPage + 1 >= logsPage.totalPages} ? ' disabled' : ''"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-right"></i>
+        </a>
+    </div>
+
+</main>
+<th:block th:replace="~{fragments/commons :: scripts}"></th:block>
+</body>
+</html>
