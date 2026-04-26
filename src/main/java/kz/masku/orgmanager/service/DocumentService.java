@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
@@ -81,22 +83,27 @@ public class DocumentService {
     }
 
     /**
-     * Returns all documents visible to the current user.
+     * Returns all documents visible to the current user, paginated, with optional status filter.
      * ADMIN → all; MANAGER → own department; EMPLOYEE → own documents.
      */
     @Transactional(readOnly = true)
-    public List<DocumentResponse> getAllDocuments(Authentication authentication) {
+    public Page<DocumentResponse> getAllDocuments(Authentication authentication,
+                                                  DocumentStatus status,
+                                                  Pageable pageable) {
         if (hasRole(authentication, "ROLE_ADMIN")) {
-            return documentRepository.findAll().stream()
-                    .map(DocumentResponse::from).toList();
+            return (status != null)
+                    ? documentRepository.findByStatusOrderByCreatedAtDesc(status, pageable).map(DocumentResponse::from)
+                    : documentRepository.findAllByOrderByCreatedAtDesc(pageable).map(DocumentResponse::from);
         }
         User user = resolveCurrentUser(authentication);
         if (hasRole(authentication, "ROLE_MANAGER") && user.getDepartment() != null) {
-            return documentRepository.findByAuthorDepartment(user.getDepartment()).stream()
-                    .map(DocumentResponse::from).toList();
+            return (status != null)
+                    ? documentRepository.findByAuthorDepartmentAndStatusPaged(user.getDepartment(), status, pageable).map(DocumentResponse::from)
+                    : documentRepository.findByAuthorDepartmentPaged(user.getDepartment(), pageable).map(DocumentResponse::from);
         }
-        return documentRepository.findByAuthor(user).stream()
-                .map(DocumentResponse::from).toList();
+        return (status != null)
+                ? documentRepository.findByAuthorAndStatusOrderByCreatedAtDesc(user, status, pageable).map(DocumentResponse::from)
+                : documentRepository.findByAuthorOrderByCreatedAtDesc(user, pageable).map(DocumentResponse::from);
     }
 
     /**

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head th:replace="~{fragments/commons :: head(${editMode} ? 'Редактировать отдел' : 'Новый отдел')}"></head>
+<body class="app-body">
+
+<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+
+<main class="main-content">
+
+    <th:block th:replace="~{fragments/commons :: alerts}"></th:block>
+
+    <!-- Header -->
+    <div class="content-header">
+        <div>
+            <h1 class="content-title"
+                th:text="${editMode} ? 'Редактировать отдел' : 'Новый отдел'">Отдел</h1>
+            <p class="page-subtitle">
+                <a th:href="@{/departments}" class="text-muted text-decoration-none">
+                    <i class="bi bi-arrow-left me-1"></i>Назад к списку
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-building me-2 text-primary"></i>
+                    <span th:text="${editMode} ? 'Данные отдела' : 'Заполните данные нового отдела'">Форма</span>
+                </div>
+                <div class="card-body">
+
+                    <!-- CREATE form -->
+                    <form th:unless="${editMode}"
+                          th:action="@{/departments}" method="post">
+
+                        <div class="mb-3">
+                            <label class="form-label">Название отдела <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control"
+                                   placeholder="Отдел разработки" required maxlength="255"/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Руководитель</label>
+                            <select name="headId" class="form-select">
+                                <option value="">— Без руководителя —</option>
+                                <option th:each="u : ${users}"
+                                        th:value="${u.id}"
+                                        th:text="${u.fullName} + ' (' + ${u.email} + ')'">Сотрудник</option>
+                            </select>
+                            <div class="form-text">Необязательно — можно назначить позже</div>
+                        </div>
+
+                        <hr class="my-4"/>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a th:href="@{/departments}" class="btn btn-outline-secondary">Отмена</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-building-add me-1"></i>Создать отдел
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- EDIT form -->
+                    <form th:if="${editMode}"
+                          th:action="@{/departments/{id}/edit(id=${department.id})}" method="post">
+
+                        <div class="mb-3">
+                            <label class="form-label">Название отдела <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control"
+                                   th:value="${department.name}" required maxlength="255"/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Руководитель</label>
+                            <select name="headId" class="form-select">
+                                <option value="">— Без руководителя —</option>
+                                <option th:each="u : ${users}"
+                                        th:value="${u.id}"
+                                        th:text="${u.fullName} + ' (' + ${u.email} + ')'"
+                                        th:selected="${u.id == department.headId}">Сотрудник</option>
+                            </select>
+                        </div>
+
+                        <div th:if="${department.employeeCount > 0}"
+                             class="alert alert-info d-flex gap-2 align-items-center py-2">
+                            <i class="bi bi-people-fill flex-shrink-0"></i>
+                            <span class="small">
+                                В отделе
+                                <strong th:text="${department.employeeCount}">0</strong>
+                                сотрудников. При удалении они останутся без отдела.
+                            </span>
+                        </div>
+
+                        <hr class="my-4"/>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a th:href="@{/departments}" class="btn btn-outline-secondary">Отмена</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-floppy me-1"></i>Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+<th:block th:replace="~{fragments/commons :: scripts}"></th:block>
+</body>
+</html>

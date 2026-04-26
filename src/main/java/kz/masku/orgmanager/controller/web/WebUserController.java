@@ -8,6 +8,7 @@ import kz.masku.orgmanager.model.enums.UserStatus;
 import kz.masku.orgmanager.repository.DepartmentRepository;
 import kz.masku.orgmanager.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,17 +24,29 @@ public class WebUserController {
     private final UserService          userService;
     private final DepartmentRepository departmentRepository;
 
+    private static final int PAGE_SIZE = 15;
+
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Transactional(readOnly = true)
     public String list(@RequestParam(required = false) Long departmentId,
                        @RequestParam(required = false) Role role,
+                       @RequestParam(defaultValue = "0") int page,
                        Model model) {
-        model.addAttribute("users",       userService.getAllUsers(departmentId, role));
-        model.addAttribute("departments", departmentRepository.findAll());
-        model.addAttribute("roles",       Role.values());
+        var usersPage = userService.getAllUsers(departmentId, role,
+                PageRequest.of(page, PAGE_SIZE));
+        int totalPages = usersPage.getTotalPages();
+        int startPage  = Math.max(0, page - 2);
+        int endPage    = Math.min(totalPages - 1, page + 2);
+
+        model.addAttribute("usersPage",    usersPage);
+        model.addAttribute("departments",  departmentRepository.findAll());
+        model.addAttribute("roles",        Role.values());
         model.addAttribute("selectedDept", departmentId);
         model.addAttribute("selectedRole", role);
+        model.addAttribute("currentPage",  page);
+        model.addAttribute("startPage",    startPage);
+        model.addAttribute("endPage",      endPage);
         return "users/list";
     }
 

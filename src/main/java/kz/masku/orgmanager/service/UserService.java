@@ -18,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 /**
@@ -73,26 +75,26 @@ public class UserService {
     }
 
     /**
-     * Lists employees with optional filters by department and/or role.
+     * Lists employees with optional filters by department and/or role, paginated.
      * Used by ADMIN (all) and MANAGER (own department only, enforced at controller).
      */
     @Transactional(readOnly = true)
-    public List<UserResponse> getAllUsers(Long departmentId, Role role) {
-        List<User> users;
-
+    public Page<UserResponse> getAllUsers(Long departmentId, Role role, Pageable pageable) {
         if (departmentId != null && role != null) {
             Department dept = departmentRepository.findById(departmentId)
                     .orElseThrow(() -> new ResourceNotFoundException("Department not found: " + departmentId));
-            users = userRepository.findByDepartmentAndRole(dept, role);
+            return userRepository.findByDepartmentAndRoleOrderByFullNameAsc(dept, role, pageable)
+                    .map(UserResponse::from);
         } else if (departmentId != null) {
-            users = userRepository.findByDepartmentId(departmentId);
+            return userRepository.findByDepartmentIdOrderByFullNameAsc(departmentId, pageable)
+                    .map(UserResponse::from);
         } else if (role != null) {
-            users = userRepository.findByRole(role);
+            return userRepository.findByRoleOrderByFullNameAsc(role, pageable)
+                    .map(UserResponse::from);
         } else {
-            users = userRepository.findAll();
+            return userRepository.findAllByOrderByFullNameAsc(pageable)
+                    .map(UserResponse::from);
         }
-
-        return users.stream().map(UserResponse::from).toList();
     }
 
     /**

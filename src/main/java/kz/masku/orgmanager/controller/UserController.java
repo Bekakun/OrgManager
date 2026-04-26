@@ -51,7 +51,9 @@ public class UserController {
     public ResponseEntity<List<UserResponse>> getAll(
             @RequestParam(required = false) Long departmentId,
             @RequestParam(required = false) Role role) {
-        return ResponseEntity.ok(userService.getAllUsers(departmentId, role));
+        return ResponseEntity.ok(
+                userService.getAllUsers(departmentId, role,
+                        org.springframework.data.domain.Pageable.unpaged()).getContent());
     }
 
     @GetMapping("/{id}")

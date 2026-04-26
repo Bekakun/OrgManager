@@ -4,6 +4,8 @@ import kz.masku.orgmanager.model.entity.Department;
 import kz.masku.orgmanager.model.entity.User;
 import kz.masku.orgmanager.model.enums.Role;
 import kz.masku.orgmanager.model.enums.UserStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -26,4 +28,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     long countByStatus(UserStatus status);
+
+    long countByDepartmentId(Long departmentId);
+
+    // ── Paginated queries ─────────────────────────────────────────────────────
+
+    Page<User> findAllByOrderByFullNameAsc(Pageable pageable);
+
+    Page<User> findByDepartmentIdOrderByFullNameAsc(Long departmentId, Pageable pageable);
+
+    Page<User> findByRoleOrderByFullNameAsc(Role role, Pageable pageable);
+
+    Page<User> findByDepartmentAndRoleOrderByFullNameAsc(Department department, Role role, Pageable pageable);
 }

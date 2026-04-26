@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
-<head th:replace="~{fragments/commons :: head('Дашборд')}"></head>
+<head th:replace="~{fragments/commons :: head('Главное')}"></head>
 <body class="app-body">
 
 <aside th:replace="~{fragments/commons :: sidebar}"></aside>
@@ -14,7 +14,7 @@
     <!-- Page header -->
     <div class="content-header">
         <div>
-            <h1 class="content-title">Дашборд</h1>
+            <h1 class="content-title">Главное</h1>
             <p class="page-subtitle">Обзор системы в реальном времени</p>
         </div>
         <div class="d-flex align-items-center gap-2 text-muted">
@@ -137,7 +137,9 @@
                         </td>
                         <td>
                             <span th:class="'status-badge status-' + ${doc.status.toLowerCase()}"
-                                  th:text="${doc.status}">DRAFT</span>
+                                  th:text="${doc.status == 'DRAFT'    ? 'Черновик' :
+                                             doc.status == 'PENDING'  ? 'На согласовании' :
+                                             doc.status == 'APPROVED' ? 'Согласован' : 'Отклонён'}">Статус</span>
                         </td>
                         <td>
                             <span class="badge bg-light text-secondary border"

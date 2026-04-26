@@ -14,7 +14,7 @@
     <div class="content-header">
         <div>
             <h1 class="content-title">Сотрудники</h1>
-            <p class="page-subtitle" th:text="${users.size()} + ' записей'">0 записей</p>
+            <p class="page-subtitle" th:text="${usersPage.totalElements} + ' записей'">0 записей</p>
         </div>
         <div class="content-actions">
             <a sec:authorize="hasRole('ADMIN')" th:href="@{/users/new}"
@@ -24,13 +24,14 @@
         </div>
     </div>
 
-    <!-- Filters -->
+    <!-- Filters (auto-submit on change) -->
     <div class="card">
         <div class="card-body py-2">
-            <form th:action="@{/users}" method="get" class="row g-2 align-items-end">
+            <form th:action="@{/users}" method="get" class="row g-2 align-items-end" id="usersFilterForm">
                 <div class="col-md-4">
                     <label class="form-label mb-1 small">Отдел</label>
-                    <select name="departmentId" class="form-select form-select-sm">
+                    <select name="departmentId" class="form-select form-select-sm"
+                            onchange="document.getElementById('usersFilterForm').submit()">
                         <option value="">Все отделы</option>
                         <option th:each="dept : ${departments}"
                                 th:value="${dept.id}"
@@ -40,7 +41,8 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label mb-1 small">Роль</label>
-                    <select name="role" class="form-select form-select-sm">
+                    <select name="role" class="form-select form-select-sm"
+                            onchange="document.getElementById('usersFilterForm').submit()">
                         <option value="">Все роли</option>
                         <option th:each="r : ${roles}"
                                 th:value="${r}"
@@ -49,11 +51,9 @@
                     </select>
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-funnel me-1"></i>Фильтр
-                    </button>
-                    <a th:href="@{/users}" class="btn btn-outline-secondary btn-sm ms-1">
-                        <i class="bi bi-x"></i>
+                    <a th:href="@{/users}" class="btn btn-outline-secondary btn-sm"
+                       title="Сбросить фильтры">
+                        <i class="bi bi-x-lg"></i>
                     </a>
                 </div>
             </form>
@@ -63,12 +63,12 @@
     <!-- Table -->
     <div class="card">
         <div class="card-body p-0">
-            <div th:if="${users.isEmpty()}" class="empty-state">
+            <div th:if="${usersPage.isEmpty()}" class="empty-state">
                 <i class="bi bi-people"></i>
                 <h5>Сотрудники не найдены</h5>
                 <p>Попробуйте изменить параметры фильтрации</p>
             </div>
-            <table th:unless="${users.isEmpty()}" class="table table-hover">
+            <table th:unless="${usersPage.isEmpty()}" class="table table-hover">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -81,7 +81,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="user : ${users}">
+                    <tr th:each="user : ${usersPage.content}">
                         <td class="text-muted" th:text="${user.id}">1</td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
@@ -128,6 +128,36 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${usersPage.totalPages > 1}" class="d-flex justify-content-center align-items-center gap-1">
+        <a th:href="@{/users(departmentId=${selectedDept}, role=${selectedRole}, page=${currentPage - 1})}"
+           th:classappend="${currentPage == 0} ? ' disabled' : ''"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-left"></i>
+        </a>
+        <span th:if="${startPage > 0}">
+            <a th:href="@{/users(departmentId=${selectedDept}, role=${selectedRole}, page=0)}"
+               class="btn btn-outline-secondary btn-sm">1</a>
+            <span th:if="${startPage > 1}" class="text-muted px-1">…</span>
+        </span>
+        <span th:each="p : ${#numbers.sequence(startPage, endPage)}">
+            <a th:href="@{/users(departmentId=${selectedDept}, role=${selectedRole}, page=${p})}"
+               th:classappend="${p == currentPage} ? ' active' : ''"
+               th:text="${p + 1}"
+               class="btn btn-outline-secondary btn-sm">1</a>
+        </span>
+        <span th:if="${endPage < usersPage.totalPages - 1}">
+            <span th:if="${endPage < usersPage.totalPages - 2}" class="text-muted px-1">…</span>
+            <a th:href="@{/users(departmentId=${selectedDept}, role=${selectedRole}, page=${usersPage.totalPages - 1})}"
+               class="btn btn-outline-secondary btn-sm" th:text="${usersPage.totalPages}">N</a>
+        </span>
+        <a th:href="@{/users(departmentId=${selectedDept}, role=${selectedRole}, page=${currentPage + 1})}"
+           th:classappend="${currentPage + 1 >= usersPage.totalPages} ? ' disabled' : ''"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-right"></i>
+        </a>
     </div>
 
 </main>

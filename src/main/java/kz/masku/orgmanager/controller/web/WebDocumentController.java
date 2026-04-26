@@ -5,9 +5,11 @@ import kz.masku.orgmanager.model.dto.ApprovalDecisionRequest;
 import kz.masku.orgmanager.model.dto.CreateDocumentRequest;
 import kz.masku.orgmanager.model.dto.SubmitForApprovalRequest;
 import kz.masku.orgmanager.model.enums.ApprovalDecision;
+import kz.masku.orgmanager.model.enums.DocumentStatus;
 import kz.masku.orgmanager.service.DocumentService;
 import kz.masku.orgmanager.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -27,9 +29,23 @@ public class WebDocumentController {
     private final DocumentService documentService;
     private final WorkflowService workflowService;
 
+    private static final int PAGE_SIZE = 15;
+
     @GetMapping
-    public String list(Authentication auth, Model model) {
-        model.addAttribute("documents", documentService.getAllDocuments(auth));
+    public String list(Authentication auth,
+                       @RequestParam(required = false) DocumentStatus status,
+                       @RequestParam(defaultValue = "0") int page,
+                       Model model) {
+        var docsPage = documentService.getAllDocuments(auth, status, PageRequest.of(page, PAGE_SIZE));
+        int totalPages = docsPage.getTotalPages();
+        int startPage  = Math.max(0, page - 2);
+        int endPage    = Math.min(totalPages - 1, page + 2);
+
+        model.addAttribute("docsPage",     docsPage);
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentPage",  page);
+        model.addAttribute("startPage",    startPage);
+        model.addAttribute("endPage",      endPage);
         return "documents/list";
     }
 

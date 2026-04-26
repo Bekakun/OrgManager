@@ -1,5 +1,6 @@
 package kz.masku.orgmanager.controller.web;
 
+import jakarta.servlet.http.HttpServletRequest;
 import kz.masku.orgmanager.model.dto.UserResponse;
 import kz.masku.orgmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +31,12 @@ public class GlobalModelAttributeAdvice {
         return userRepository.findByEmail(authentication.getName())
                 .map(UserResponse::from)
                 .orElse(null);
+    }
+
+    /** Exposes the current request URI to all Thymeleaf templates.
+     *  Replaces the now-restricted #{request.requestURI} (Thymeleaf 3.1+). */
+    @ModelAttribute("requestURI")
+    public String requestURI(HttpServletRequest request) {
+        return request.getRequestURI();
     }
 }

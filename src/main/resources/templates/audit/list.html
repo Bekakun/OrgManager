@@ -72,12 +72,12 @@
                                   class="badge bg-secondary">СИСТЕМА</span>
                         </td>
                         <td>
-                            <span th:class="'badge ' +
-                                (${log.action.contains('CREATED')}  ? 'bg-success' :
-                                 ${log.action.contains('DELETED') or log.action.contains('DEACTIVATED')} ? 'bg-danger' :
-                                 ${log.action.contains('APPROVED')} ? 'bg-success' :
-                                 ${log.action.contains('REJECTED')} ? 'bg-danger' :
-                                 ${log.action.contains('SUBMITTED')} ? 'bg-warning text-dark' : 'bg-secondary')"
+                            <span th:class="${'badge ' +
+                                (log.action.contains('CREATED')  ? 'bg-success' :
+                                (log.action.contains('DELETED') or log.action.contains('DEACTIVATED') ? 'bg-danger' :
+                                (log.action.contains('APPROVED') ? 'bg-success' :
+                                (log.action.contains('REJECTED') ? 'bg-danger' :
+                                (log.action.contains('SUBMITTED') ? 'bg-warning text-dark' : 'bg-secondary')))))}"
                                   th:text="${log.action}">ACTION</span>
                         </td>
                         <td class="text-muted" th:text="${log.entityType ?: '—'}">Entity</td>

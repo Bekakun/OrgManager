@@ -14,7 +14,7 @@
     <div class="content-header">
         <div>
             <h1 class="content-title">Документы</h1>
-            <p class="page-subtitle" th:text="${documents.size()} + ' документов'">0 документов</p>
+            <p class="page-subtitle" th:text="${docsPage.totalElements} + ' документов'">0 документов</p>
         </div>
         <div class="content-actions">
             <a th:href="@{/documents/new}" class="btn btn-primary">
@@ -45,7 +45,7 @@
     <!-- Table -->
     <div class="card">
         <div class="card-body p-0">
-            <div th:if="${documents.isEmpty()}" class="empty-state">
+            <div th:if="${docsPage.isEmpty()}" class="empty-state">
                 <i class="bi bi-file-earmark"></i>
                 <h5>Документов нет</h5>
                 <p>Создайте первый документ для начала работы</p>
@@ -54,7 +54,7 @@
                 </a>
             </div>
 
-            <table th:unless="${documents.isEmpty()}" class="table table-hover">
+            <table th:unless="${docsPage.isEmpty()}" class="table table-hover">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -69,7 +69,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="doc : ${documents}">
+                    <tr th:each="doc : ${docsPage.content}">
                         <td class="text-muted" th:text="${doc.id}">1</td>
                         <td>
                             <a th:href="@{/documents/{id}(id=${doc.id})}"
@@ -111,6 +111,36 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${docsPage.totalPages > 1}" class="d-flex justify-content-center align-items-center gap-1">
+        <a th:href="@{/documents(status=${currentStatus}, page=${currentPage - 1})}"
+           th:classappend="${currentPage == 0} ? ' disabled' : ''"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-left"></i>
+        </a>
+        <span th:if="${startPage > 0}">
+            <a th:href="@{/documents(status=${currentStatus}, page=0)}"
+               class="btn btn-outline-secondary btn-sm">1</a>
+            <span th:if="${startPage > 1}" class="text-muted px-1">…</span>
+        </span>
+        <span th:each="p : ${#numbers.sequence(startPage, endPage)}">
+            <a th:href="@{/documents(status=${currentStatus}, page=${p})}"
+               th:classappend="${p == currentPage} ? ' active' : ''"
+               th:text="${p + 1}"
+               class="btn btn-outline-secondary btn-sm">1</a>
+        </span>
+        <span th:if="${endPage < docsPage.totalPages - 1}">
+            <span th:if="${endPage < docsPage.totalPages - 2}" class="text-muted px-1">…</span>
+            <a th:href="@{/documents(status=${currentStatus}, page=${docsPage.totalPages - 1})}"
+               class="btn btn-outline-secondary btn-sm" th:text="${docsPage.totalPages}">N</a>
+        </span>
+        <a th:href="@{/documents(status=${currentStatus}, page=${currentPage + 1})}"
+           th:classappend="${currentPage + 1 >= docsPage.totalPages} ? ' disabled' : ''"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-right"></i>
+        </a>
     </div>
 
 </main>

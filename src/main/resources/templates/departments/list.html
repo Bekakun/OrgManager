@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ru">
+<head th:replace="~{fragments/commons :: head('Отделы')}"></head>
+<body class="app-body">
+
+<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+
+<main class="main-content">
+
+    <th:block th:replace="~{fragments/commons :: alerts}"></th:block>
+
+    <!-- Header -->
+    <div class="content-header">
+        <div>
+            <h1 class="content-title">Отделы</h1>
+            <p class="page-subtitle" th:text="${deptsPage.totalElements} + ' отделов'">0 отделов</p>
+        </div>
+        <div class="content-actions">
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/departments/new}"
+               class="btn btn-primary">
+                <i class="bi bi-building-add me-1"></i>Добавить отдел
+            </a>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+        <div class="card-body p-0">
+
+            <div th:if="${deptsPage.isEmpty()}" class="empty-state">
+                <i class="bi bi-building"></i>
+                <h5>Отделы не найдены</h5>
+                <p>Добавьте первый отдел с помощью кнопки выше</p>
+            </div>
+
+            <table th:unless="${deptsPage.isEmpty()}" class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Название</th>
+                        <th>Руководитель</th>
+                        <th>Сотрудников</th>
+                        <th sec:authorize="hasRole('ADMIN')">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="dept : ${deptsPage.content}">
+                        <td class="text-muted" th:text="${dept.id}">1</td>
+
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-sm bg-primary bg-opacity-10 text-primary"
+                                     style="font-size:.8rem">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <span class="fw-500" th:text="${dept.name}">Название</span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span th:if="${dept.headName != null}"
+                                  class="d-flex align-items-center gap-2">
+                                <div class="avatar-sm"
+                                     th:text="${dept.headName.substring(0,1).toUpperCase()}">A</div>
+                                <span th:text="${dept.headName}">ФИО</span>
+                            </span>
+                            <span th:unless="${dept.headName != null}" class="text-muted">—</span>
+                        </td>
+
+                        <td>
+                            <span class="badge bg-light text-secondary border"
+                                  th:text="${dept.employeeCount} + ' чел.'">0 чел.</span>
+                        </td>
+
+                        <td sec:authorize="hasRole('ADMIN')">
+                            <div class="d-flex gap-1">
+                                <a th:href="@{/departments/{id}/edit(id=${dept.id})}"
+                                   class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:action="@{/departments/{id}/delete(id=${dept.id})}"
+                                      method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            title="Удалить"
+                                            th:data-name="${dept.name}"
+                                            onclick="return confirm('Удалить отдел «' + this.dataset.name + '»? Сотрудники останутся без отдела.')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${deptsPage.totalPages > 1}" class="d-flex justify-content-center align-items-center gap-1">
+        <a th:href="@{/departments(page=${currentPage - 1})}"
+           th:classappend="${currentPage == 0} ? ' disabled' : ''"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-left"></i>
+        </a>
+        <span th:if="${startPage > 0}">
+            <a th:href="@{/departments(page=0)}" class="btn btn-outline-secondary btn-sm">1</a>
+            <span th:if="${startPage > 1}" class="text-muted px-1">…</span>
+        </span>
+        <span th:each="p : ${#numbers.sequence(startPage, endPage)}">
+            <a th:href="@{/departments(page=${p})}"
+               th:classappend="${p == currentPage} ? ' active' : ''"
+               th:text="${p + 1}"
+               class="btn btn-outline-secondary btn-sm">1</a>
+        </span>
+        <span th:if="${endPage < deptsPage.totalPages - 1}">
+            <span th:if="${endPage < deptsPage.totalPages - 2}" class="text-muted px-1">…</span>
+            <a th:href="@{/departments(page=${deptsPage.totalPages - 1})}"
+               class="btn btn-outline-secondary btn-sm" th:text="${deptsPage.totalPages}">N</a>
+        </span>
+        <a th:href="@{/departments(page=${currentPage + 1})}"
+           th:classappend="${currentPage + 1 >= deptsPage.totalPages} ? ' disabled' : ''"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chevron-right"></i>
+        </a>
+    </div>
+
+</main>
+<th:block th:replace="~{fragments/commons :: scripts}"></th:block>
+</body>
+</html>

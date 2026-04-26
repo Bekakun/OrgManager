@@ -61,7 +61,9 @@ public class DocumentController {
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List documents visible to the current user")
     public ResponseEntity<List<DocumentResponse>> getAll(Authentication authentication) {
-        return ResponseEntity.ok(documentService.getAllDocuments(authentication));
+        return ResponseEntity.ok(
+                documentService.getAllDocuments(authentication, null,
+                        org.springframework.data.domain.Pageable.unpaged()).getContent());
     }
 
     @GetMapping("/{id}")
