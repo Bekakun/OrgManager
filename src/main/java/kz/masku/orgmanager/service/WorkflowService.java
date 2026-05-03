@@ -1,6 +1,5 @@
 package kz.masku.orgmanager.service;
 
-import kz.masku.orgmanager.audit.Auditable;
 import kz.masku.orgmanager.exception.BusinessException;
 import kz.masku.orgmanager.exception.ResourceNotFoundException;
 import kz.masku.orgmanager.model.dto.ApprovalDecisionRequest;
@@ -59,7 +58,6 @@ public class WorkflowService {
      * @throws BusinessException     if the document is not in DRAFT state
      * @throws AccessDeniedException if the current user is not the author
      */
-    @Auditable(action = "DOCUMENT_SUBMITTED", entityType = "Document")
     public DocumentResponse submitForApproval(Long documentId,
                                               SubmitForApprovalRequest request,
                                               Authentication auth) {
@@ -96,7 +94,7 @@ public class WorkflowService {
         documentRepository.save(doc);
 
         auditService.log(current.getId(), "DOCUMENT_SUBMITTED", "Document", doc.getId(),
-                "approvers=" + request.approverIds());
+                "Отправлен на согласование. Согласующих: " + request.approverIds().size());
 
         return DocumentResponse.from(doc);
     }
@@ -120,7 +118,6 @@ public class WorkflowService {
      * @throws BusinessException     if the document is not PENDING or the approval was already decided
      * @throws AccessDeniedException if the current user is not the assigned approver
      */
-    @Auditable(action = "APPROVAL_DECISION", entityType = "Document")
     public DocumentResponse processApproval(Long documentId,
                                             Long approvalId,
                                             ApprovalDecisionRequest request,
@@ -160,9 +157,11 @@ public class WorkflowService {
         // Recompute document-level status from all approval records
         recalculateDocumentStatus(doc);
 
+        String decisionRu = request.decision() == ApprovalDecision.APPROVED ? "Одобрено" : "Отклонено";
+        String commentPart = (request.comment() != null && !request.comment().isBlank())
+                ? ". Комментарий: " + request.comment() : "";
         auditService.log(current.getId(), "APPROVAL_DECISION", "Document", doc.getId(),
-                "approvalId=" + approvalId + " decision=" + request.decision()
-                        + " comment=" + request.comment());
+                "Решение: " + decisionRu + commentPart);
 
         return DocumentResponse.from(doc);
     }
@@ -178,7 +177,6 @@ public class WorkflowService {
      * @return updated document DTO with DRAFT status and incremented version
      * @throws BusinessException if the document is not in REJECTED state
      */
-    @Auditable(action = "DOCUMENT_RETURNED_TO_DRAFT", entityType = "Document")
     public DocumentResponse returnToDraft(Long documentId, Authentication auth) {
         Document doc     = documentService.findById(documentId);
         User     current = documentService.resolveCurrentUser(auth);
@@ -196,7 +194,7 @@ public class WorkflowService {
         documentRepository.save(doc);
 
         auditService.log(current.getId(), "DOCUMENT_RETURNED_TO_DRAFT", "Document", doc.getId(),
-                "newVersion=" + doc.getVersion());
+                "Возвращён на доработку. Версия: " + doc.getVersion());
 
         return DocumentResponse.from(doc);
     }

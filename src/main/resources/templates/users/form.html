@@ -4,7 +4,7 @@
 <head th:replace="~{fragments/commons :: head(${editMode} ? 'Редактировать сотрудника' : 'Новый сотрудник')}"></head>
 <body class="app-body">
 
-<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+<nav th:replace="~{fragments/commons :: topnav}"></nav>
 
 <main class="main-content">
 
@@ -69,7 +69,8 @@
                             <div class="col-md-6">
                                 <label class="form-label">Роль <span class="text-danger">*</span></label>
                                 <select name="role" class="form-select" required>
-                                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">ROLE</option>
+                                    <option th:each="r : ${roles}" th:value="${r}"
+                                            th:text="${r.name() == 'ADMIN' ? 'Администратор' : (r.name() == 'MANAGER' ? 'Менеджер' : 'Сотрудник')}">Роль</option>
                                 </select>
                             </div>
                         </div>

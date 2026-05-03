@@ -4,7 +4,7 @@
 <head th:replace="~{fragments/commons :: head('Журнал аудита')}"></head>
 <body class="app-body">
 
-<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+<nav th:replace="~{fragments/commons :: topnav}"></nav>
 
 <main class="main-content">
 
@@ -17,7 +17,7 @@
             <p class="page-subtitle">Полная история всех действий в системе</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-danger">ADMIN</span>
+            <span class="badge bg-danger">Администратор</span>
             <span class="text-muted small">Только для администраторов</span>
         </div>
     </div>
@@ -73,19 +73,36 @@
                         </td>
                         <td>
                             <span th:class="${'badge ' +
-                                (log.action.contains('CREATED')  ? 'bg-success' :
+                                (log.action.contains('CREATED')   ? 'bg-success' :
                                 (log.action.contains('DELETED') or log.action.contains('DEACTIVATED') ? 'bg-danger' :
-                                (log.action.contains('APPROVED') ? 'bg-success' :
-                                (log.action.contains('REJECTED') ? 'bg-danger' :
-                                (log.action.contains('SUBMITTED') ? 'bg-warning text-dark' : 'bg-secondary')))))}"
-                                  th:text="${log.action}">ACTION</span>
+                                (log.action.contains('APPROVED') and !log.action.contains('DECISION') ? 'bg-success' :
+                                (log.action.contains('REJECTED')  ? 'bg-danger' :
+                                (log.action.contains('SUBMITTED') ? 'bg-warning text-dark' :
+                                (log.action.contains('DECISION')  ? 'bg-info text-dark' :
+                                (log.action.contains('RETURNED')  ? 'bg-secondary' : 'bg-secondary')))))))}"
+                                  th:text="${
+                                    log.action == 'USER_CREATED'              ? 'Сотрудник создан' :
+                                    log.action == 'USER_UPDATED'              ? 'Сотрудник обновлён' :
+                                    log.action == 'USER_DEACTIVATED'          ? 'Сотрудник деактивирован' :
+                                    log.action == 'DOCUMENT_CREATED'          ? 'Документ создан' :
+                                    log.action == 'DOCUMENT_SUBMITTED'        ? 'Отправлен на согласование' :
+                                    log.action == 'APPROVAL_DECISION'         ? 'Решение по документу' :
+                                    log.action == 'DOCUMENT_RETURNED_TO_DRAFT'? 'Возврат на доработку' :
+                                    log.action == 'DEPARTMENT_CREATED'        ? 'Отдел создан' :
+                                    log.action == 'DEPARTMENT_UPDATED'        ? 'Отдел обновлён' :
+                                    log.action == 'DEPARTMENT_DELETED'        ? 'Отдел удалён' :
+                                    log.action}">Действие</span>
                         </td>
-                        <td class="text-muted" th:text="${log.entityType ?: '—'}">Entity</td>
+                        <td class="text-muted"
+                            th:text="${log.entityType == 'Document'   ? 'Документ' :
+                                       log.entityType == 'User'       ? 'Сотрудник' :
+                                       log.entityType == 'Department' ? 'Отдел' :
+                                       log.entityType ?: '—'}">Объект</td>
                         <td class="text-muted" th:text="${log.entityId ?: '—'}">1</td>
                         <td>
                             <span th:if="${log.details != null}"
-                                  class="text-muted small" style="word-break:break-all"
-                                  th:text="${#strings.abbreviate(log.details, 60)}">details</span>
+                                  class="text-muted small"
+                                  th:text="${#strings.abbreviate(log.details, 80)}">details</span>
                             <span th:unless="${log.details != null}" class="text-muted">—</span>
                         </td>
                     </tr>

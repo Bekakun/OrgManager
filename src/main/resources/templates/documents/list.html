@@ -4,7 +4,7 @@
 <head th:replace="~{fragments/commons :: head('Документы')}"></head>
 <body class="app-body">
 
-<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+<nav th:replace="~{fragments/commons :: topnav}"></nav>
 
 <main class="main-content">
 
@@ -48,10 +48,7 @@
             <div th:if="${docsPage.isEmpty()}" class="empty-state">
                 <i class="bi bi-file-earmark"></i>
                 <h5>Документов нет</h5>
-                <p>Создайте первый документ для начала работы</p>
-                <a th:href="@{/documents/new}" class="btn btn-primary btn-sm mt-2">
-                    <i class="bi bi-plus-lg me-1"></i>Создать документ
-                </a>
+                <p>Воспользуйтесь кнопкой «Создать документ» в правом верхнем углу</p>
             </div>
 
             <table th:unless="${docsPage.isEmpty()}" class="table table-hover">

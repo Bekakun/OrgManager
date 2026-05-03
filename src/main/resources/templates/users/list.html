@@ -4,7 +4,7 @@
 <head th:replace="~{fragments/commons :: head('Сотрудники')}"></head>
 <body class="app-body">
 
-<aside th:replace="~{fragments/commons :: sidebar}"></aside>
+<nav th:replace="~{fragments/commons :: topnav}"></nav>
 
 <main class="main-content">
 
@@ -46,15 +46,9 @@
                         <option value="">Все роли</option>
                         <option th:each="r : ${roles}"
                                 th:value="${r}"
-                                th:text="${r}"
+                                th:text="${r.name() == 'ADMIN' ? 'Администратор' : (r.name() == 'MANAGER' ? 'Менеджер' : 'Сотрудник')}"
                                 th:selected="${r == selectedRole}">ROLE</option>
                     </select>
-                </div>
-                <div class="col-auto">
-                    <a th:href="@{/users}" class="btn btn-outline-secondary btn-sm"
-                       title="Сбросить фильтры">
-                        <i class="bi bi-x-lg"></i>
-                    </a>
                 </div>
             </form>
         </div>
@@ -102,7 +96,7 @@
                         </td>
                         <td>
                             <span th:class="'badge ' + (${user.role == 'ADMIN'} ? 'bg-danger' : (${user.role == 'MANAGER'} ? 'bg-warning text-dark' : 'bg-secondary'))"
-                                  th:text="${user.role}">ROLE</span>
+                                  th:text="${user.role == 'ADMIN' ? 'Администратор' : (user.role == 'MANAGER' ? 'Менеджер' : 'Сотрудник')}">Роль</span>
                         </td>
                         <td>
                             <span th:class="'badge ' + (${user.status == 'ACTIVE'} ? 'bg-success' : 'bg-secondary')"

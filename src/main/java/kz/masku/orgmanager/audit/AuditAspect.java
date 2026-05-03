@@ -42,7 +42,6 @@ public class AuditAspect {
                 .getAnnotation(Auditable.class);
 
         String currentUserEmail = resolveCurrentUserEmail();
-        String details = "method=" + joinPoint.getSignature().toShortString();
 
         log.debug("AUDIT fired: action={} entity={} user={}",
                 auditable.action(), auditable.entityType(), currentUserEmail);
@@ -52,7 +51,7 @@ public class AuditAspect {
                 auditable.action(),
                 auditable.entityType(),
                 null,
-                details
+                null   // details not needed — action name is self-descriptive
         );
     }
 

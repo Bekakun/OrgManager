@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I{} sed -i 's|<aside th:replace=\"~{fragments/commons :: sidebar}\"></aside>|<nav th:replace=\"~{fragments/commons :: topnav}\"></nav>|g' {})"
+    ]
+  }
+}
